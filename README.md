@@ -1,5 +1,7 @@
 # web-scrapping
 
-Each directory contains the needed files to make web scrapping of an spacific website.
+Each directory contains the needed files to perform web scrapping of an specific website.
 
-- ISCIII
+Scrapped websites:
+
+- ISCIII: <https://portalfis.isciii.es/es/Paginas/inicio.aspx>
