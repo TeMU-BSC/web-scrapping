@@ -1,10 +1,4 @@
-# Web scrapping of ISCIII webpage
-
-<https://www.acn.cat/>
-
-## Requisites
-
-`python >= 3.8`
+# Web scrapping for <https://www.acn.cat/>
 
 ## Usage
 
