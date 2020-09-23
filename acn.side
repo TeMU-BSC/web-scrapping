@@ -1,0 +1,82 @@
+{
+  "id": "477b8039-2948-4644-b218-4e1ae8d3d4ac",
+  "version": "2.0",
+  "name": "acn",
+  "url": "https://www.acn.cat",
+  "tests": [{
+    "id": "4c38ffec-bded-44f2-8dd1-0556d6a8cfaf",
+    "name": "login",
+    "commands": [{
+      "id": "7b46421f-4e56-41b7-aa2d-e53c6047d8ca",
+      "comment": "",
+      "command": "open",
+      "target": "/",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "b14a5de9-d8b6-4f8e-8600-c592c1913421",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Entra",
+      "targets": [
+        ["linkText=Entra", "linkText"],
+        ["css=p:nth-child(3) > .uk-button", "css:finder"],
+        ["xpath=//a[contains(text(),'Entra')]", "xpath:link"],
+        ["xpath=//a[contains(@href, '#login-modal')]", "xpath:href"],
+        ["xpath=//p[2]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'Entra')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "1f6c0180-aef4-49fe-a3bc-ba88fd2478e2",
+      "comment": "",
+      "command": "type",
+      "target": "name=username",
+      "targets": [
+        ["name=username", "name"],
+        ["css=.uk-form-row:nth-child(2) > .uk-width-1-1", "css:finder"],
+        ["xpath=//input[@name='username']", "xpath:attributes"],
+        ["xpath=//div[@id='login-modal']/div/div/form/div[2]/input", "xpath:idRelative"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "TEXT"
+    }, {
+      "id": "2413248b-39ae-46d2-a030-256dee4b83b0",
+      "comment": "",
+      "command": "type",
+      "target": "name=password",
+      "targets": [
+        ["name=password", "name"],
+        ["css=.uk-form-row:nth-child(3) > .uk-width-1-1", "css:finder"],
+        ["xpath=//input[@name='password']", "xpath:attributes"],
+        ["xpath=//div[@id='login-modal']/div/div/form/div[3]/input", "xpath:idRelative"],
+        ["xpath=//div[3]/input", "xpath:position"]
+      ],
+      "value": "1865GB"
+    }, {
+      "id": "7959d83a-c8e1-44df-9d53-f9f055a38a87",
+      "comment": "",
+      "command": "click",
+      "target": "name=Submit",
+      "targets": [
+        ["name=Submit", "name"],
+        ["css=.uk-button-primary", "css:finder"],
+        ["xpath=//button[@name='Submit']", "xpath:attributes"],
+        ["xpath=//div[@id='login-modal']/div/div/form/div[5]/button", "xpath:idRelative"],
+        ["xpath=//button", "xpath:position"],
+        ["xpath=//button[contains(.,'Entra')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }]
+  }],
+  "suites": [{
+    "id": "cfd7b3c6-498c-42a7-bee9-5b78f1413dc9",
+    "name": "Default Suite",
+    "persistSession": false,
+    "parallel": false,
+    "timeout": 300,
+    "tests": ["4c38ffec-bded-44f2-8dd1-0556d6a8cfaf"]
+  }],
+  "urls": ["https://www.acn.cat/"],
+  "plugins": []
+}
