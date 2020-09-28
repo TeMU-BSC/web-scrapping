@@ -132,3 +132,6 @@ dmypy.json
 
 # Visual Studio Code
 .vscode/
+
+# Downloaded files while scrapping
+downloaded_files/
