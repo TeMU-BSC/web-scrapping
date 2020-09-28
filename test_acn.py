@@ -5,7 +5,8 @@ using Selenium IDE and Selenium Web Driver for Firefox.
 https://addons.mozilla.org/en-US/firefox/addon/selenium-ide/
 https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
 
-Usage: pytest test_acn.py
+Usage: pytest -s test_acn.py
+Note: -s, --capture=no option allows to see stdout ilke print() statements inside test_* functions.
 
 Author: https://github.com/aasensios
 '''
@@ -45,17 +46,27 @@ class TestAcn():
     def teardown_method(self, method):
         self.driver.quit()
 
-    def test_login_and_download_text_file(self):
-        self.driver.get("https://www.acn.cat/")
+    def test_download_text_files(self):
 
         # Login
-        self.driver.find_element(By.LINK_TEXT, "Entra").click()
-        self.driver.find_element(By.NAME, "username").send_keys("TEXT")
-        self.driver.find_element(By.NAME, "password").send_keys("1865GB")
-        self.driver.find_element(By.NAME, "Submit").click()
+        self.driver.get("https://www.acn.cat/subscriptors")
+        self.driver.find_element(By.ID, "username").send_keys("TEXT")
+        self.driver.find_element(By.ID, "password").send_keys("1865GB")
+        self.driver.find_element(By.XPATH, "//button[@type=\'submit\']").click()
 
-        # Load specific page
-        self.driver.get("https://www.acn.cat/text/cultura/item/el-liceu-inaugura-temporada-amb-mesures-per-la-covid-19-i-es-retroba-amb-el-public-despres-de-sis-mesos")
+        # Accept cookies disclaimer banner to avoid selenium.common.exceptions.ElementClickInterceptedException
+        self.driver.find_element_by_class_name('accept').click()
 
-        # Trigger the download button for the clean text file
-        self.driver.find_element(By.CLASS_NAME, "uk-button").click()
+        # Go to section where news can be downloaded as plain text files
+        self.driver.get("https://www.acn.cat/text")
+        TOTAL_PAGES = 14505
+        for page in range(TOTAL_PAGES):
+            for button in self.driver.find_elements_by_link_text('text'):
+                button.click()
+                print(button)
+
+            # Next page
+            self.driver.find_element(By.LINK_TEXT, "»").click()
+
+        # Logout
+        self.driver.find_element(By.LINK_TEXT, "Surt").click()

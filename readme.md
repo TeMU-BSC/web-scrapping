@@ -12,10 +12,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 
 # ISCIII's Portal FIS: <https://portalfis.isciii.es/es/Paginas/inicio.aspx>
-pytest test_portalfis.py
+pytest -s test_portalfis.py
 
 # Agència Catalana de Notícies: <https://www.acn.cat/>
-pytest test_acn.py
+pytest -s test_acn.py
 
 deactivate
 ```
