@@ -107,6 +107,124 @@
       ],
       "value": ""
     }]
+  }, {
+    "id": "10eb1dd0-a5b3-4f95-93d4-6be44a2d3e04",
+    "name": "download_text_and_metadata",
+    "commands": [{
+      "id": "1f49c859-799e-4647-8506-fddeff7eedeb",
+      "comment": "",
+      "command": "open",
+      "target": "/subscriptors",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "bda4bcce-2cfa-4698-8d7f-d1df79b5f9e4",
+      "comment": "",
+      "command": "type",
+      "target": "id=username",
+      "targets": [
+        ["id=username", "id"],
+        ["name=username", "name"],
+        ["css=#username", "css:finder"],
+        ["xpath=//input[@id='username']", "xpath:attributes"],
+        ["xpath=//input", "xpath:position"]
+      ],
+      "value": "TEXT"
+    }, {
+      "id": "89ab123c-dfde-4554-aa34-5cf6afeb4cf6",
+      "comment": "",
+      "command": "type",
+      "target": "id=password",
+      "targets": [],
+      "value": "1865GB"
+    }, {
+      "id": "7130aad1-ba3f-4c7c-9eb3-1b9b84f30d9e",
+      "comment": "",
+      "command": "click",
+      "target": "xpath=//button[@type='submit']",
+      "targets": [
+        ["css=.btn", "css:finder"],
+        ["xpath=//button[@type='submit']", "xpath:attributes"],
+        ["xpath=//button", "xpath:position"],
+        ["xpath=//button[contains(.,'Entra')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "785345d1-82a5-4858-b8e9-9e6c64a7ae89",
+      "comment": "",
+      "command": "click",
+      "target": "css=.accept",
+      "targets": [
+        ["css=.accept", "css:finder"],
+        ["xpath=//div[@id='ca_banner']/div/div", "xpath:idRelative"],
+        ["xpath=//div[2]/div/div/div", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "65766c98-2dc7-42f4-ba0a-b41d8bbccd04",
+      "comment": "",
+      "command": "open",
+      "target": "/text/14527",
+      "targets": [],
+      "value": ""
+    }, {
+      "id": "142fd525-3cff-4c10-99b7-30cc3527ba69",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=Els caçadors veuen perillar les aus aquàtiques del Delta de l'Ebre",
+      "targets": [
+        ["linkText=Els caçadors veuen perillar les aus aquàtiques del Delta de l'Ebre", "linkText"],
+        ["css=.uk-row-first > .uk-article:nth-child(1) > .uk-panel a", "css:finder"],
+        ["xpath=//a[contains(@href, '/text/item/els-cacadors-veuen-perillar-les-aus-aquatiques-del-delta-de-lebre-804681')]", "xpath:href"],
+        ["xpath=//h4/a", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "f6791675-afa6-4a0d-bc44-aabb6b827671",
+      "comment": "",
+      "command": "click",
+      "target": "id=download_1002142-0",
+      "targets": [
+        ["id=download_1002142-0", "id"],
+        ["css=#download_1002142-0", "css:finder"],
+        ["xpath=(//a[contains(text(),'Text')])[2]", "xpath:link"],
+        ["xpath=//a[@id='download_1002142-0']", "xpath:attributes"],
+        ["xpath=//div[4]/li/a", "xpath:position"],
+        ["xpath=//a[contains(.,' Text')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "786c8678-9512-4fe6-8b61-905c531ef28f",
+      "comment": "",
+      "command": "click",
+      "target": "css=.tm-block-top-main",
+      "targets": [
+        ["css=.tm-block-top-main", "css:finder"],
+        ["xpath=//div[2]/div[3]", "xpath:position"]
+      ],
+      "value": ""
+    }, {
+      "id": "19ae1c3f-5230-42f5-bb33-eb58b7bb223b",
+      "comment": "",
+      "command": "click",
+      "target": "linkText=»",
+      "targets": [
+        ["linkText=»", "linkText"],
+        ["css=.uk-pagination > li:nth-child(6) > a", "css:finder"],
+        ["xpath=//a[contains(text(),'»')]", "xpath:link"],
+        ["xpath=(//a[contains(@href, '/text/2')])[2]", "xpath:href"],
+        ["xpath=//div[2]/ul/li[6]/a", "xpath:position"],
+        ["xpath=//a[contains(.,'»')]", "xpath:innerText"]
+      ],
+      "value": ""
+    }, {
+      "id": "97c3b40a-98a8-4990-abf1-46a8704d1dfa",
+      "comment": "",
+      "command": "//click",
+      "target": "linkText=Surt",
+      "targets": [],
+      "value": ""
+    }]
   }],
   "suites": [{
     "id": "cfd7b3c6-498c-42a7-bee9-5b78f1413dc9",

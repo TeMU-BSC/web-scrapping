@@ -47,26 +47,52 @@ class TestAcn():
         self.driver.quit()
 
     def test_download_text_files(self):
+        BASE_URL = 'https://www.acn.cat'
 
         # Login
-        self.driver.get("https://www.acn.cat/subscriptors")
-        self.driver.find_element(By.ID, "username").send_keys("TEXT")
-        self.driver.find_element(By.ID, "password").send_keys("1865GB")
-        self.driver.find_element(By.XPATH, "//button[@type=\'submit\']").click()
+        self.driver.get(f"{BASE_URL}/subscriptors")
+        self.driver.find_element_by_id("username").send_keys("TEXT")
+        self.driver.find_element_by_id("password").send_keys("1865GB")
+        self.driver.find_element_by_xpath("//button[@type=\'submit\']").click()
 
-        # Accept cookies disclaimer banner to avoid selenium.common.exceptions.ElementClickInterceptedException
+        # Accept cookies in bottom banner to avoid selenium.common.exceptions.ElementClickInterceptedException
         self.driver.find_element_by_class_name('accept').click()
 
         # Go to section where news can be downloaded as plain text files
-        self.driver.get("https://www.acn.cat/text")
-        TOTAL_PAGES = 14505
-        for page in range(TOTAL_PAGES):
-            for button in self.driver.find_elements_by_link_text('text'):
-                button.click()
-                print(button)
+        TOTAL_PAGES = 14531
+        # self.driver.get(f"{BASE_URL}/text/{TOTAL_PAGES - 1}")
+        self.driver.get(f"{BASE_URL}/text")
+        while True:
+            print('Current page url: ', self.driver.current_url)
+            articles_hrefs = [title.get_attribute("href") for title in self.driver.find_elements_by_xpath("//a[@title]") if title.get_attribute('href').startswith('https://www.acn.cat/text/item/')]
+            for article_href in articles_hrefs:
+                print('\n', article_href)
+                self.driver.get(article_href)
 
-            # Next page
-            self.driver.find_element(By.LINK_TEXT, "»").click()
+                # Download plain text
+                self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
+
+                # Get metadata
+                seccio_subseccio = self.driver.find_elements_by_class_name('element-relatedcategories')[0].text
+                codificacio_territorial = self.driver.find_elements_by_class_name('element-relatedcategories')[1].text
+                categories = self.driver.find_element_by_class_name('element-itemcategory').text
+                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text
+                etiquetes = self.driver.find_element_by_class_name('element-itemtag').text
+
+                print(seccio_subseccio)
+                print(codificacio_territorial)
+                print(categories)
+                print(id)
+                print(etiquetes)
+
+                # parse metadata
+                # write metadata in noticia_ID.json file
+
+            # Next page or finish on last page
+            if self.driver.find_elements_by_link_text("»"):
+                self.driver.find_element_by_link_text("»").click()
+            else:
+                break
 
         # Logout
-        self.driver.find_element(By.LINK_TEXT, "Surt").click()
+        self.driver.find_element_by_link_text("Surt").click()
