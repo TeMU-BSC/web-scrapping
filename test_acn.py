@@ -32,13 +32,12 @@ DOWNLOADS_DIR = os.path.join(Path().absolute(), 'downloaded_files')
 
 class TestAcn():
     def setup_method(self, method):
-        # Prevent download dialog when emulating click action in browser.
-        # https://stackoverflow.com/a/62254004
         options = webdriver.FirefoxOptions()
-        options.set_preference('browser.download.manager.showWhenStarting', False)
+        options.set_preference('browser.download.manager.showWhenStarting', False)  # Prevent download dialog: https://stackoverflow.com/a/62254004
         options.set_preference('browser.download.dir', DOWNLOADS_DIR)
         options.set_preference('browser.download.folderList', 2)  # 0: Desktop, 1: Downloads, 2: custom directory
         options.set_preference('browser.helperApps.neverAsk.saveToDisk', 'text/html')  # Checked 'content-type: text/html' in Browser: F12 > Network > Headers
+        options.headless = True  # Prevent GUI browser launching.
         self.driver = webdriver.Firefox(
             executable_path=os.path.join(Path().absolute(), 'geckodriver-v0.27.0-linux64/geckodriver'),
             options=options,
