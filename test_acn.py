@@ -22,19 +22,21 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+from selenium.common.exceptions import NoSuchElementException
 
 from pathlib import Path
 import os
 
+BASE_URL = 'https://www.acn.cat'
+DOWNLOADS_DIR = os.path.join(Path().absolute(), 'downloaded_files')
 
 class TestAcn():
     def setup_method(self, method):
-        # Prevent download dialog
+        # Prevent download dialog when emulating click action in browser.
         # https://stackoverflow.com/a/62254004
-        downloads_dir = os.path.join(Path().absolute(), 'downloaded_files')
         options = webdriver.FirefoxOptions()
         options.set_preference('browser.download.manager.showWhenStarting', False)
-        options.set_preference('browser.download.dir', downloads_dir)
+        options.set_preference('browser.download.dir', DOWNLOADS_DIR)
         options.set_preference('browser.download.folderList', 2)  # 0: Desktop, 1: Downloads, 2: custom directory
         options.set_preference('browser.helperApps.neverAsk.saveToDisk', 'text/html')  # Checked 'content-type: text/html' in Browser: F12 > Network > Headers
         self.driver = webdriver.Firefox(
@@ -46,8 +48,7 @@ class TestAcn():
     def teardown_method(self, method):
         self.driver.quit()
 
-    def test_download_text_files(self):
-        BASE_URL = 'https://www.acn.cat'
+    def test_download_news_with_metadata(self):
 
         # Login
         self.driver.get(f"{BASE_URL}/subscriptors")
@@ -55,44 +56,71 @@ class TestAcn():
         self.driver.find_element_by_id("password").send_keys("1865GB")
         self.driver.find_element_by_xpath("//button[@type=\'submit\']").click()
 
-        # Accept cookies in bottom banner to avoid selenium.common.exceptions.ElementClickInterceptedException
+        # Accept cookies in bottom banner to avoid 'selenium.common.exceptions.ElementClickInterceptedException'.
         self.driver.find_element_by_class_name('accept').click()
 
-        # Go to section where news can be downloaded as plain text files
-        TOTAL_PAGES = 14531
-        # self.driver.get(f"{BASE_URL}/text/{TOTAL_PAGES - 1}")
-        self.driver.get(f"{BASE_URL}/text")
+        # Go to section where news can be downloaded as plain text files.
+        self.driver.get(f"{BASE_URL}/text/14545")
         while True:
-            print('Current page url: ', self.driver.current_url)
-            articles_hrefs = [title.get_attribute("href") for title in self.driver.find_elements_by_xpath("//a[@title]") if title.get_attribute('href').startswith('https://www.acn.cat/text/item/')]
-            for article_href in articles_hrefs:
-                print('\n', article_href)
-                self.driver.get(article_href)
+            current_page_url = self.driver.current_url
+            print('')
+            print(current_page_url)
+            article_elements = self.driver.find_elements_by_xpath("//a[starts-with(@href, '/text/item')]")
+            articles_urls = [element.get_attribute("href") for element in article_elements]
+            for article_url in articles_urls:
 
-                # Download plain text
+                # User terminal progress feedback.
+                print(article_url)
+
+                # Load the article in emulated browser.
+                self.driver.get(article_url)
+
+                # Download the txt file.
                 self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
+                
+                # Get metadata.
+                publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
+                section_subsection = self.driver.find_elements_by_class_name('element-relatedcategories')[0].text.split(': ')[1].split(', ')
+                section = section_subsection[0]
+                subsection = section_subsection[1] if len(section_subsection) > 1 else None
+                territorial_coding = self.driver.find_elements_by_class_name('element-relatedcategories')[1].text.split(': ')[1].split(', ')
+                categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
+                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
 
-                # Get metadata
-                seccio_subseccio = self.driver.find_elements_by_class_name('element-relatedcategories')[0].text
-                codificacio_territorial = self.driver.find_elements_by_class_name('element-relatedcategories')[1].text
-                categories = self.driver.find_element_by_class_name('element-itemcategory').text
-                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text
-                etiquetes = self.driver.find_element_by_class_name('element-itemtag').text
+                # Older articles may not have assigned tags.
+                try:
+                    tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')  # Fix missing colon ':'.
+                except NoSuchElementException:
+                    tags = list()
 
-                print(seccio_subseccio)
-                print(codificacio_territorial)
-                print(categories)
-                print(id)
-                print(etiquetes)
+                # Get plain text content from the downloaded file knowing the article's id.
+                with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')) as f:
+                    text = f.read()
 
-                # parse metadata
-                # write metadata in noticia_ID.json file
+                metadata = dict(
+                    url=article_url,
+                    publication_datetime=publication_datetime,
+                    text=text,
+                    title=text.splitlines()[0],
+                    subtitle=text.splitlines()[1],
+                    body='\n'.join(line for line in text.splitlines()[2:] if line),
+                    section=section,
+                    subsection=subsection,
+                    territorial_coding=territorial_coding,
+                    categories=categories,
+                    id=id,
+                    tags=tags,
+                )
 
-            # Next page or finish on last page
-            if self.driver.find_elements_by_link_text("»"):
-                self.driver.find_element_by_link_text("»").click()
-            else:
+                # Write metadata and text in a json file.
+                with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.json'), 'w') as f:
+                    json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+            # Go back to current page and look for next page button or finish if last page
+            self.driver.get(current_page_url)
+            if not self.driver.find_elements_by_link_text("»"):
                 break
+            self.driver.find_element_by_link_text("»").click()
 
         # Logout
         self.driver.find_element_by_link_text("Surt").click()
