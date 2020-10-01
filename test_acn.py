@@ -27,22 +27,32 @@ from selenium.common.exceptions import NoSuchElementException
 from pathlib import Path
 import os
 
-BASE_URL = 'https://www.acn.cat'
+CHROMEDRIVER_PATH = os.path.join(Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
 DOWNLOADS_DIR = os.path.join(Path().absolute(), 'downloaded_files')
+BASE_URL = 'https://www.acn.cat'
+USERNAME = 'TEXT'
+PASSWORD = '1865GB'
 
 class TestAcn():
     def setup_method(self, method):
-        options = webdriver.FirefoxOptions()
-        options.set_preference('browser.download.manager.showWhenStarting', False)  # Prevent download dialog: https://stackoverflow.com/a/62254004
-        options.set_preference('browser.download.dir', DOWNLOADS_DIR)
-        options.set_preference('browser.download.folderList', 2)  # 0: Desktop, 1: Downloads, 2: custom directory
-        options.set_preference('browser.helperApps.neverAsk.saveToDisk', 'text/html')  # Checked 'content-type: text/html' in Browser: F12 > Network > Headers
-        options.headless = True  # Prevent GUI browser launching.
-        self.driver = webdriver.Firefox(
-            executable_path=os.path.join(Path().absolute(), 'geckodriver-v0.27.0-linux64/geckodriver'),
-            options=options,
-        )
         self.vars = {}
+
+        # Running Chrome Headless with Selenium & Python on Linux Servers
+        # https://blog.testproject.io/2018/02/20/chrome-headless-selenium-python-linux-servers/
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox') # Required when running as root user; otherwise you would get no sandbox errors. 
+        prefs = {
+            "download.default_directory": DOWNLOADS_DIR,
+            "download.prompt_for_download": False,
+            "download.directory_upgrade": True,
+        }
+        chrome_options.add_experimental_option('prefs', prefs)
+        self.driver = webdriver.Chrome(
+            executable_path=CHROMEDRIVER_PATH,
+            chrome_options=chrome_options,
+            service_args=['--verbose', '--log-path=./chromedriver.log']
+        )
 
     def teardown_method(self, method):
         self.driver.quit()
@@ -51,8 +61,8 @@ class TestAcn():
 
         # Login
         self.driver.get(f"{BASE_URL}/subscriptors")
-        self.driver.find_element_by_id("username").send_keys("TEXT")
-        self.driver.find_element_by_id("password").send_keys("1865GB")
+        self.driver.find_element_by_id("username").send_keys(USERNAME)
+        self.driver.find_element_by_id("password").send_keys(PASSWORD)
         self.driver.find_element_by_xpath("//button[@type=\'submit\']").click()
 
         # Accept cookies in bottom banner to avoid 'selenium.common.exceptions.ElementClickInterceptedException'.
