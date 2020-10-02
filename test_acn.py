@@ -50,7 +50,7 @@ class TestAcn():
         chrome_options.add_experimental_option('prefs', prefs)
         self.driver = webdriver.Chrome(
             executable_path=CHROMEDRIVER_PATH,
-            chrome_options=chrome_options,
+            options=chrome_options,
             service_args=['--verbose', '--log-path=./chromedriver.log']
         )
 
@@ -69,11 +69,14 @@ class TestAcn():
         self.driver.find_element_by_class_name('accept').click()
 
         # Go to section where news can be downloaded as plain text files.
-        self.driver.get(f"{BASE_URL}/text/14545")
+        self.driver.get(f"{BASE_URL}/text")
         while True:
             current_page_url = self.driver.current_url
+
+            # User terminal progress feedback.
             print('')
             print(current_page_url)
+
             article_elements = self.driver.find_elements_by_xpath("//a[starts-with(@href, '/text/item')]")
             articles_urls = [element.get_attribute("href") for element in article_elements]
             for article_url in articles_urls:
@@ -96,7 +99,7 @@ class TestAcn():
                 categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
                 id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
 
-                # Older articles may not have assigned tags.
+                # Some articles may not have assigned tags.
                 try:
                     tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')  # Fix missing colon ':'.
                 except NoSuchElementException:
@@ -125,7 +128,7 @@ class TestAcn():
                 with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.json'), 'w') as f:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
 
-            # Go back to current page and look for next page button or finish if last page
+            # Go back to current page and look for next page button or finish if last page.
             self.driver.get(current_page_url)
             if not self.driver.find_elements_by_link_text("»"):
                 break
