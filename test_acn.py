@@ -24,8 +24,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import NoSuchElementException
 
-from pathlib import Path
 import os
+from pathlib import Path
+from pyvirtualdisplay import Display
 
 CHROMEDRIVER_PATH = os.path.join(Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
 DOWNLOADS_DIR = os.path.join(Path().absolute(), 'downloaded_files')
@@ -37,7 +38,6 @@ class TestAcn():
     def setup_method(self, method):
         self.vars = {}
 
-        # Running Chrome Headless with Selenium & Python on Linux Servers
         # https://blog.testproject.io/2018/02/20/chrome-headless-selenium-python-linux-servers/
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--headless')
@@ -48,6 +48,10 @@ class TestAcn():
             "download.directory_upgrade": True,
         }
         chrome_options.add_experimental_option('prefs', prefs)
+
+        # Start a virtual display before lanching Chrome.
+        Display().start()
+
         self.driver = webdriver.Chrome(
             executable_path=CHROMEDRIVER_PATH,
             options=chrome_options,
