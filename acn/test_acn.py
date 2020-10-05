@@ -32,8 +32,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import NoSuchElementException
 
-from filewaiter import FileWaiter
-
 CHROMEDRIVER_PATH = os.path.join(pathlib.Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
 DOWNLOADS_DIR = os.path.join(pathlib.Path().absolute(), 'acn', 'downloaded')
 METADATA_DIR = os.path.join(pathlib.Path().absolute(), 'acn', 'articles_with_metadata')
