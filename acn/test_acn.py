@@ -33,8 +33,9 @@ from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.common.exceptions import NoSuchElementException
 
 CHROMEDRIVER_PATH = os.path.join(pathlib.Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
-DOWNLOADS_DIR = os.path.join(pathlib.Path().absolute(), 'acn', 'downloaded')
-METADATA_DIR = os.path.join(pathlib.Path().absolute(), 'acn', 'articles_with_metadata')
+PROJECT_DIR = 'acn'
+DOWNLOADS_DIR = os.path.join(pathlib.Path().absolute(), PROJECT_DIR, 'downloaded')
+METADATA_DIR = os.path.join(pathlib.Path().absolute(), PROJECT_DIR, 'articles_with_metadata')
 BASE_URL = 'https://www.acn.cat'
 USERNAME = 'TEXT'
 PASSWORD = '1865GB'
@@ -91,11 +92,20 @@ class TestAcn():
         # Accept cookies in bottom banner to avoid 'selenium.common.exceptions.ElementClickInterceptedException'.
         self.driver.find_element_by_class_name('accept').click()
 
+        # Read what page start scrapping from.
+        with open(os.path.join(PROJECT_DIR, 'acn_last_visited_page.txt')) as f:
+            page_url = f.read()
+        if picked_page := input('Start scrapping from page [press RETURN to start from last visited page]: '):
+            page_url = f'{BASE_URL}/text/{picked_page}'
+
         # Go to section where news can be downloaded as plain text files.
-        page = input('Start scrapping from page [press RETURN to start from first page]: ')
-        self.driver.get(f"{BASE_URL}/text/{page}")
+        self.driver.get(page_url)
         while True:
             current_page_url = self.driver.current_url
+
+            # Override tha last page visited.
+            with open(os.path.join(PROJECT_DIR, 'acn_last_visited_page.txt'), 'w') as f:
+                f.write(current_page_url)
 
             # Terminal feedback on currently precessed page.
             print('')
@@ -125,7 +135,8 @@ class TestAcn():
 
                 # Some articles may not have assigned tags.
                 try:
-                    tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')  # Fix missing colon ':'.
+                    # Fix missing colon ':'.
+                    tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')
                 except NoSuchElementException:
                     tags = list()
 
