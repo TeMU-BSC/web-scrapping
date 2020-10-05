@@ -15,13 +15,13 @@ class FileWaiter:
         endtime = time.time() + timeout
         while True:
             diff_files = set(glob.glob(self.path)) - self.files
-            if diff_files :
+            if diff_files:
                 new_file = diff_files.pop()
                 try:
                     os.rename(new_file, new_file)
                     self.files = set(glob.glob(self.path))
                     return new_file
-                except :
+                except:
                     pass
             if time.time() > endtime:
                     raise Exception("Timeout while waiting for a new file in %s" % self.path)

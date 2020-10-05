@@ -17,11 +17,9 @@ Note: -s (--capture=no) option allows to see stdout like print statements inside
 Author: https://github.com/aasensios
 '''
 
-import glob
 import json
 import os
 import pathlib
-import time
 
 import pytest
 from pyvirtualdisplay import Display
@@ -96,7 +94,8 @@ class TestAcn():
         self.driver.find_element_by_class_name('accept').click()
 
         # Go to section where news can be downloaded as plain text files.
-        self.driver.get(f"{BASE_URL}/text")
+        page = input('Start scrapping from page [press RETURN to start from first page]: ')
+        self.driver.get(f"{BASE_URL}/text/{page}")
         while True:
             current_page_url = self.driver.current_url
 
@@ -128,7 +127,6 @@ class TestAcn():
 
                 # Get the filename and build the json filename as well.
                 txt_file_path = new_file
-                json_file_path = os.path.join(METADATA_DIR, f'noticia_{id}.json')
 
                 # Get metadata.
                 publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
@@ -167,7 +165,7 @@ class TestAcn():
                 )
 
                 # Write metadata and text in a json file.
-                with open(json_file_path, 'w') as f:
+                with open(os.path.join(METADATA_DIR, f'noticia_{id}.json'), 'w') as f:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
 
             # Go back to current page and look for next page button or finish if last page.

@@ -137,4 +137,4 @@ dmypy.json
 downloaded/
 
 # Parsed resulting files
-parsed/
+articles_with_metadata/
