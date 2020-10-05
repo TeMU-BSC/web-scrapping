@@ -35,10 +35,18 @@ from pathlib import Path
 from pyvirtualdisplay import Display
 
 CHROMEDRIVER_PATH = os.path.join(Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
-DOWNLOADS_DIR = os.path.join(Path().absolute(), 'downloaded_files')
+DOWNLOADS_DIR = os.path.join(Path().absolute(), 'acn', 'downloaded')
+PARSED_DIR = os.path.join(Path().absolute(), 'acn', 'parsed')
 BASE_URL = 'https://www.acn.cat'
 USERNAME = 'TEXT'
 PASSWORD = '1865GB'
+
+visited_urls = list()
+for dirpath, dirnames, filenames in os.walk(PARSED_DIR):
+    for filename in filenames:
+        with open(os.path.join(dirpath, filename)) as f:
+            url = json.load(f).get('url')
+            visited_urls.append(url)
 
 class TestAcn():
     def setup_method(self, method):
@@ -88,8 +96,11 @@ class TestAcn():
             print(current_page_url)
 
             article_elements = self.driver.find_elements_by_xpath("//a[starts-with(@href, '/text/item')]")
-            articles_urls = [element.get_attribute("href") for element in article_elements]
+            articles_urls = [element.get_attribute("href") for element in article_elements if element.get_attribute("href") not in visited_urls]
             for article_url in articles_urls:
+
+                # Terminal feedback on currently processed article.
+                print(article_url)
 
                 # Load the article in emulated browser.
                 self.driver.get(article_url)
@@ -97,6 +108,7 @@ class TestAcn():
                 # Get the article id.
                 id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
                 txt_file_path = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
+                json_file_path = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.json')
 
                 # Avoid downloading and parsing an article more than once.
                 if os.path.isfile(txt_file_path):
@@ -142,11 +154,8 @@ class TestAcn():
                 )
 
                 # Write metadata and text in a json file.
-                with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.json'), 'w') as f:
+                with open(json_file_path, 'w') as f:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
-
-                # Terminal feedback on currently processed article.
-                print(article_url)
 
             # Go back to current page and look for next page button or finish if last page.
             self.driver.get(current_page_url)

@@ -134,4 +134,7 @@ dmypy.json
 .vscode/
 
 # Downloaded files while scrapping
-downloaded_files/
+downloaded/
+
+# Parsed resulting files
+parsed/
