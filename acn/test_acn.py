@@ -41,6 +41,11 @@ BASE_URL = 'https://www.acn.cat'
 USERNAME = 'TEXT'
 PASSWORD = '1865GB'
 
+if not os.path.isdir(DOWNLOADS_DIR):
+    os.mkdir(DOWNLOADS_DIR)
+if not os.path.isdir(PARSED_DIR):
+    os.mkdir(PARSED_DIR)
+
 visited_urls = list()
 for dirpath, dirnames, filenames in os.walk(PARSED_DIR):
     for filename in filenames:
@@ -108,7 +113,7 @@ class TestAcn():
                 # Get the article id.
                 id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
                 txt_file_path = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
-                json_file_path = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.json')
+                json_file_path = os.path.join(PARSED_DIR, f'noticia_{id}.json')
 
                 # Avoid downloading and parsing an article more than once.
                 if os.path.isfile(txt_file_path):
