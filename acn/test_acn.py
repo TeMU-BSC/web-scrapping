@@ -113,20 +113,8 @@ class TestAcn():
                 # Load the article in emulated browser.
                 self.driver.get(article_url)
 
-                # Get the article id.
-                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
-
-                # Take a snapshot of the downloads directory.
-                waiter = FileWaiter(f"{DOWNLOADS_DIR}/*.txt")
-
                 # Download the txt file.
                 self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
-
-                # Wait for the file to be downloaded or timeout after 10 seconds.
-                new_file = waiter.wait_new_file(10)
-
-                # Get the filename and build the json filename as well.
-                txt_file_path = new_file
 
                 # Get metadata.
                 publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
@@ -135,6 +123,7 @@ class TestAcn():
                 subsection = section_subsection[1] if len(section_subsection) > 1 else None
                 territorial_coding = self.driver.find_elements_by_class_name('element-relatedcategories')[1].text.split(': ')[1].split(', ')
                 categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
+                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
 
                 # Some articles may not have assigned tags.
                 try:
@@ -143,7 +132,7 @@ class TestAcn():
                     tags = list()
 
                 # Parse article's text content.
-                with open(txt_file_path) as f:
+                with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')) as f:
                     text = f.read()
                     title = text.splitlines()[0]
                     subtitle = text.splitlines()[1]
