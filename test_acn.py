@@ -2,6 +2,12 @@
 Script to download news from Agència Calatana de Notícies (ACN) website
 using Selenium IDE and Selenium Web Driver for Firefox.
 
+This scrapper is prepared to run without graphical interface, using the chrome
+driver and faking a screen via a python wrapper for Xvfb.
+
+For each article, the script checks if that article has been previously
+downloaded, so it can be executed in different moments avoiding duplicates.
+
 https://addons.mozilla.org/en-US/firefox/addon/selenium-ide/
 https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
 
@@ -77,7 +83,7 @@ class TestAcn():
         while True:
             current_page_url = self.driver.current_url
 
-            # User terminal progress feedback.
+            # Terminal feedback on currently precessed page.
             print('')
             print(current_page_url)
 
@@ -85,15 +91,20 @@ class TestAcn():
             articles_urls = [element.get_attribute("href") for element in article_elements]
             for article_url in articles_urls:
 
-                # User terminal progress feedback.
-                print(article_url)
-
                 # Load the article in emulated browser.
                 self.driver.get(article_url)
 
+                # Get the article id.
+                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
+                txt_file_path = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
+
+                # Avoid downloading and parsing an article more than once.
+                if os.path.isfile(txt_file_path):
+                    continue
+
                 # Download the txt file.
                 self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
-                
+
                 # Get metadata.
                 publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
                 section_subsection = self.driver.find_elements_by_class_name('element-relatedcategories')[0].text.split(': ')[1].split(', ')
@@ -101,7 +112,6 @@ class TestAcn():
                 subsection = section_subsection[1] if len(section_subsection) > 1 else None
                 territorial_coding = self.driver.find_elements_by_class_name('element-relatedcategories')[1].text.split(': ')[1].split(', ')
                 categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
-                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
 
                 # Some articles may not have assigned tags.
                 try:
@@ -110,16 +120,19 @@ class TestAcn():
                     tags = list()
 
                 # Get plain text content from the downloaded file knowing the article's id.
-                with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')) as f:
+                with open(txt_file_path) as f:
                     text = f.read()
+                    title = text.splitlines()[0]
+                    subtitle = text.splitlines()[1]
+                    body = '\n'.join(line for line in text.splitlines()[2:] if line)
 
                 metadata = dict(
                     url=article_url,
                     publication_datetime=publication_datetime,
                     text=text,
-                    title=text.splitlines()[0],
-                    subtitle=text.splitlines()[1],
-                    body='\n'.join(line for line in text.splitlines()[2:] if line),
+                    title=title,
+                    subtitle=subtitle,
+                    body=body,
                     section=section,
                     subsection=subsection,
                     territorial_coding=territorial_coding,
@@ -131,6 +144,9 @@ class TestAcn():
                 # Write metadata and text in a json file.
                 with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.json'), 'w') as f:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+                # Terminal feedback on currently processed article.
+                print(article_url)
 
             # Go back to current page and look for next page button or finish if last page.
             self.driver.get(current_page_url)
