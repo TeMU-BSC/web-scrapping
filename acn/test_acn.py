@@ -82,7 +82,7 @@ class TestAcn():
 
     def teardown_method(self, method):
         self.driver.quit()
-        self.disp.quit()
+        self.disp.stop()
 
     def test_download_news_with_metadata(self):
 
