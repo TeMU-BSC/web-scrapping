@@ -20,6 +20,7 @@ Author: https://github.com/aasensios
 import json
 import os
 import pathlib
+import time
 
 import pytest
 from pyvirtualdisplay import Display
