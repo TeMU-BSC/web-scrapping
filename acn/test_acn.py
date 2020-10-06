@@ -30,7 +30,6 @@ from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from selenium.common.exceptions import NoSuchElementException
 
 CHROMEDRIVER_PATH = os.path.join(pathlib.Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
 PROJECT_DIR = 'acn'
@@ -123,6 +122,9 @@ class TestAcn():
 
                 # Download the txt file.
                 self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
+                
+                # Get article's id.
+                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
                 text_file = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
 
                 # Wait until the file has been downloaded.
@@ -136,13 +138,12 @@ class TestAcn():
                 subsection = section_subsection[1] if len(section_subsection) > 1 else None
                 territorial_coding = self.driver.find_elements_by_class_name('element-relatedcategories')[1].text.split(': ')[1].split(', ')
                 categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
-                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
 
                 # Some articles may not have assigned tags.
                 try:
                     # Fix missing colon ':'.
                     tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')
-                except NoSuchElementException:
+                except expected_conditions.NoSuchElementException:
                     tags = list()
 
                 # Parse article's text content.
