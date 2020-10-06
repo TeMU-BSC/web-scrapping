@@ -11,8 +11,11 @@ downloaded, so it can be executed in different moments avoiding duplicates.
 https://addons.mozilla.org/en-US/firefox/addon/selenium-ide/
 https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
 
-Usage: pytest -s acn/test_acn.py
-Note: -s (--capture=no) option allows to see stdout like print statements inside test_* functions.
+Usage:
+    xvfb-run pytest -s acn/test_acn.py
+Notes:
+    Xvfb has to be installed on the system (sudo apt install xvfb).
+    -s (--capture=no) option allows to see stdout like print statements inside test_* functions.
 
 Author: https://github.com/aasensios
 '''

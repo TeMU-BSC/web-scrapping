@@ -15,7 +15,8 @@ pip install -r requirements.txt
 pytest -s portalfis/test_portalfis.py
 
 # Agència Catalana de Notícies: <https://www.acn.cat/>
-pytest -s acn/test_acn.py
+sudo apt install xvfb
+xvfb-run pytest -s acn/test_acn.py
 
 deactivate
 ```
