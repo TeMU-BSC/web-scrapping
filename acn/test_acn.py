@@ -123,6 +123,11 @@ class TestAcn():
 
                 # Download the txt file.
                 self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
+                text_file = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
+
+                # Wait until the file has been downloaded.
+                while not os.path.isfile(text_file):
+                    time.sleep(0.5)
 
                 # Get metadata.
                 publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
@@ -141,7 +146,7 @@ class TestAcn():
                     tags = list()
 
                 # Parse article's text content.
-                with open(os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')) as f:
+                with open(text_file) as f:
                     text = f.read()
                     title = text.splitlines()[0]
                     subtitle = text.splitlines()[1]
