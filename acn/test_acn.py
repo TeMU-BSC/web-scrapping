@@ -58,6 +58,9 @@ class TestAcn():
     def setup_method(self, method):
         self.vars = {}
 
+        # Start a virtual display before lanching Chrome.
+        self.disp = Display().start()
+
         # https://blog.testproject.io/2018/02/20/chrome-headless-selenium-python-linux-servers/
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument('--headless')
@@ -68,10 +71,6 @@ class TestAcn():
             "download.directory_upgrade": True,
         }
         chrome_options.add_experimental_option('prefs', prefs)
-
-        # Start a virtual display before lanching Chrome.
-        Display().start()
-
         self.driver = webdriver.Chrome(
             executable_path=CHROMEDRIVER_PATH,
             options=chrome_options,
@@ -80,6 +79,7 @@ class TestAcn():
 
     def teardown_method(self, method):
         self.driver.quit()
+        self.disp.quit()
 
     def test_download_news_with_metadata(self):
 
