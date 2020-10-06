@@ -183,4 +183,4 @@ class TestAcn():
             self.driver.find_element_by_link_text("»").click()
 
         # Logout
-        self.driver.find_element_by_link_text("Surt").click()
+        self.driver.get(f'{BASE_URL}/surt')
