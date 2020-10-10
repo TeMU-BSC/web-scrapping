@@ -136,14 +136,23 @@ class TestAcn():
 
                 # Get metadata.
                 publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
-                related_categories = self.driver.find_elements_by_class_name('element-relatedcategories')
-                section_subsection = related_categories[0].text.split(': ')[1].split(', ')
-                section = section_subsection[0]
-                subsection = section_subsection[1] if len(section_subsection) > 1 else None
-                territorial_coding = related_categories[1].text.split(': ')[1].split(', ') if len(related_categories) > 1 else None
                 categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
+                related_categories = self.driver.find_elements_by_class_name('element-relatedcategories')
 
-                # Some articles may not have tags.
+                # Some articles may not have some metadata.
+                try:
+                    section_subsection = related_categories[0].text.split(': ')[1].split(', ')
+                    section = section_subsection[0]
+                    subsection = section_subsection[1] if len(section_subsection) > 1 else None
+                except:
+                    section = None
+                    subsection = None
+                
+                try:
+                    territorial_coding = related_categories[1].text.split(': ')[1].split(', ') if len(related_categories) > 1 else None
+                except:
+                    territorial_coding = None
+
                 try:
                     # Fix missing colon ':' in HTML rendering.
                     tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')
