@@ -61,131 +61,133 @@ else:
 
 # Store the visited URLs to avoid downloading and parsing the same articles more than once.
 with open(SCRAPPED_URLS_FILE_PATH) as f:
-    scrapped_urls = list(f.readlines())
+    scrapped_urls = list(f.read().splitlines())
 
+print(scrapped_urls)
 print(f'Total scrapped articles: {len(scrapped_urls)}')
 
-class TestAcn():
-    def setup_method(self, method):
-        self.vars = {}
 
-        # Start a virtual display before lanching Chrome.
-        self.disp = Display().start()
+# class TestAcn():
+#     def setup_method(self, method):
+#         self.vars = {}
 
-        # https://blog.testproject.io/2018/02/20/chrome-headless-selenium-python-linux-servers/
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox') # Required when running as root user; otherwise you would get no sandbox errors. 
-        prefs = {
-            "download.default_directory": DOWNLOADS_DIR,
-            "download.prompt_for_download": False,
-            "download.directory_upgrade": True,
-        }
-        chrome_options.add_experimental_option('prefs', prefs)
-        self.driver = webdriver.Chrome(
-            executable_path=CHROMEDRIVER_PATH,
-            options=chrome_options,
-            service_args=['--verbose', '--log-path=./chromedriver.log']
-        )
+#         # Start a virtual display before lanching Chrome.
+#         self.disp = Display().start()
 
-    def teardown_method(self, method):
-        self.driver.quit()
-        self.disp.stop()
+#         # https://blog.testproject.io/2018/02/20/chrome-headless-selenium-python-linux-servers/
+#         chrome_options = webdriver.ChromeOptions()
+#         chrome_options.add_argument('--headless')
+#         chrome_options.add_argument('--no-sandbox') # Required when running as root user; otherwise you would get no sandbox errors. 
+#         prefs = {
+#             "download.default_directory": DOWNLOADS_DIR,
+#             "download.prompt_for_download": False,
+#             "download.directory_upgrade": True,
+#         }
+#         chrome_options.add_experimental_option('prefs', prefs)
+#         self.driver = webdriver.Chrome(
+#             executable_path=CHROMEDRIVER_PATH,
+#             options=chrome_options,
+#             service_args=['--verbose', '--log-path=./chromedriver.log']
+#         )
 
-    def test_download_news_with_metadata(self):
+#     def teardown_method(self, method):
+#         self.driver.quit()
+#         self.disp.stop()
 
-        # Login
-        self.driver.get(f"{BASE_URL}/subscriptors")
-        self.driver.find_element_by_id("username").send_keys(USERNAME)
-        self.driver.find_element_by_id("password").send_keys(PASSWORD)
-        self.driver.find_element_by_xpath("//button[@type=\'submit\']").click()
+#     def test_download_news_with_metadata(self):
 
-        # Accept cookies in bottom banner to avoid 'selenium.common.exceptions.ElementClickInterceptedException'.
-        self.driver.find_element_by_class_name('accept').click()
+#         # Login
+#         self.driver.get(f"{BASE_URL}/subscriptors")
+#         self.driver.find_element_by_id("username").send_keys(USERNAME)
+#         self.driver.find_element_by_id("password").send_keys(PASSWORD)
+#         self.driver.find_element_by_xpath("//button[@type=\'submit\']").click()
 
-        # Go to section where news can be downloaded as plain text files.
-        self.driver.get(page_url)
-        while True:
-            current_page_url = self.driver.current_url
+#         # Accept cookies in bottom banner to avoid 'selenium.common.exceptions.ElementClickInterceptedException'.
+#         self.driver.find_element_by_class_name('accept').click()
 
-            # Overwrite the last page visited.
-            with open(LAST_VISITED_PAGE_FILE_PATH, 'w') as f:
-                f.write(current_page_url)
+#         # Go to section where news can be downloaded as plain text files.
+#         self.driver.get(page_url)
+#         while True:
+#             current_page_url = self.driver.current_url
 
-            # Terminal feedback on currently precessed page.
-            print('')
-            print(current_page_url)
+#             # Overwrite the last page visited.
+#             with open(LAST_VISITED_PAGE_FILE_PATH, 'w') as f:
+#                 f.write(current_page_url)
 
-            article_elements = self.driver.find_elements_by_xpath("//a[starts-with(@href, '/text/item')]")
-            articles_urls = [href for element in article_elements if (href := element.get_attribute("href")) not in scrapped_urls]
-            for article_url in articles_urls:
+#             # Terminal feedback on currently precessed page.
+#             print('')
+#             print(current_page_url)
 
-                # Terminal feedback on currently processed article.
-                print(article_url)
+#             article_elements = self.driver.find_elements_by_xpath("//a[starts-with(@href, '/text/item')]")
+#             articles_urls = [href for element in article_elements if (href := element.get_attribute("href")) not in scrapped_urls]
+#             for article_url in articles_urls:
 
-                # Load the article in emulated browser.
-                self.driver.get(article_url)
+#                 # Terminal feedback on currently processed article.
+#                 print(article_url)
 
-                # Get article's id.
-                id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
-                text_file = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
+#                 # Load the article in emulated browser.
+#                 self.driver.get(article_url)
 
-                # Download the plain text file and wait until the file is downloaded.
-                self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
-                while not os.path.isfile(text_file):
-                    time.sleep(0.5)
+#                 # Get article's id.
+#                 id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
+#                 text_file = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
 
-                # Get metadata.
-                publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
-                related_categories = self.driver.find_elements_by_class_name('element-relatedcategories')
-                section_subsection = related_categories[0].text.split(': ')[1].split(', ')
-                section = section_subsection[0]
-                subsection = section_subsection[1] if len(section_subsection) > 1 else None
-                territorial_coding = related_categories[1].text.split(': ')[1].split(', ') if len(related_categories) > 1 else None
-                categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
+#                 # Download the plain text file and wait until the file is downloaded.
+#                 self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
+#                 while not os.path.isfile(text_file):
+#                     time.sleep(0.5)
 
-                # Some articles may not have tags.
-                try:
-                    # Fix missing colon ':' in HTML rendering.
-                    tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')
-                except expected_conditions.NoSuchElementException:
-                    tags = list()
+#                 # Get metadata.
+#                 publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
+#                 related_categories = self.driver.find_elements_by_class_name('element-relatedcategories')
+#                 section_subsection = related_categories[0].text.split(': ')[1].split(', ')
+#                 section = section_subsection[0]
+#                 subsection = section_subsection[1] if len(section_subsection) > 1 else None
+#                 territorial_coding = related_categories[1].text.split(': ')[1].split(', ') if len(related_categories) > 1 else None
+#                 categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
 
-                # Parse article's text content.
-                with open(text_file) as f:
-                    text = f.read()
-                    title = text.splitlines()[0]
-                    subtitle = text.splitlines()[1]
-                    body = '\n'.join(line for line in text.splitlines()[2:] if line)
+#                 # Some articles may not have tags.
+#                 try:
+#                     # Fix missing colon ':' in HTML rendering.
+#                     tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')
+#                 except expected_conditions.NoSuchElementException:
+#                     tags = list()
 
-                metadata = dict(
-                    url=article_url,
-                    publication_datetime=publication_datetime,
-                    text=text,
-                    title=title,
-                    subtitle=subtitle,
-                    body=body,
-                    section=section,
-                    subsection=subsection,
-                    territorial_coding=territorial_coding,
-                    categories=categories,
-                    id=id,
-                    tags=tags,
-                )
+#                 # Parse article's text content.
+#                 with open(text_file) as f:
+#                     text = f.read()
+#                     title = text.splitlines()[0]
+#                     subtitle = text.splitlines()[1]
+#                     body = '\n'.join(line for line in text.splitlines()[2:] if line)
 
-                # Write metadata and text in a json file.
-                with open(os.path.join(METADATA_DIR, f'noticia_{id}.json'), 'w') as f:
-                    json.dump(metadata, f, ensure_ascii=False, indent=2)
+#                 metadata = dict(
+#                     url=article_url,
+#                     publication_datetime=publication_datetime,
+#                     text=text,
+#                     title=title,
+#                     subtitle=subtitle,
+#                     body=body,
+#                     section=section,
+#                     subsection=subsection,
+#                     territorial_coding=territorial_coding,
+#                     categories=categories,
+#                     id=id,
+#                     tags=tags,
+#                 )
 
-                # Write the scrapped URL in a file to avoid parsing the same article more than once in further executions.
-                with open(SCRAPPED_URLS_FILE_PATH, 'a') as f:
-                    f.write(f'{article_url}\n')
+#                 # Write metadata and text in a json file.
+#                 with open(os.path.join(METADATA_DIR, f'noticia_{id}.json'), 'w') as f:
+#                     json.dump(metadata, f, ensure_ascii=False, indent=2)
 
-            # Go back to current page and look for next page button or finish if last page.
-            self.driver.get(current_page_url)
-            if not self.driver.find_elements_by_link_text("»"):
-                break
-            self.driver.find_element_by_link_text("»").click()
+#                 # Write the scrapped URL in a file to avoid parsing the same article more than once in further executions.
+#                 with open(SCRAPPED_URLS_FILE_PATH, 'a') as f:
+#                     f.write(f'{article_url}\n')
 
-        # Logout
-        self.driver.get(f'{BASE_URL}/surt')
+#             # Go back to current page and look for next page button or finish if last page.
+#             self.driver.get(current_page_url)
+#             if not self.driver.find_elements_by_link_text("»"):
+#                 break
+#             self.driver.find_element_by_link_text("»").click()
+
+#         # Logout
+#         self.driver.get(f'{BASE_URL}/surt')
