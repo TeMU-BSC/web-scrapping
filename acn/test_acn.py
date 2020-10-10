@@ -12,7 +12,8 @@ https://addons.mozilla.org/en-US/firefox/addon/selenium-ide/
 https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
 
 Usage:
-    xvfb-run pytest -s acn/test_acn.py
+    xvfb-run pytest -s test_acn.py
+
 Notes:
     Xvfb has to be installed on the system (sudo apt install xvfb).
     -s (--capture=no) option allows to see stdout like print statements inside test_* functions.
@@ -35,27 +36,34 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-CHROMEDRIVER_PATH = os.path.join(pathlib.Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
-PROJECT_DIR = 'acn'
-DOWNLOADS_DIR = os.path.join(pathlib.Path().absolute(), PROJECT_DIR, 'downloaded')
-METADATA_DIR = os.path.join(pathlib.Path().absolute(), PROJECT_DIR, 'articles_with_metadata')
+CHROMEDRIVER_PATH = os.path.join(pathlib.Path(__file__).parent.parent.absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
+LAST_VISITED_PAGE_FILE_PATH = pathlib.Path('last_visited_page.txt')
+SCRAPPED_URLS_FILE_PATH = pathlib.Path('scrapped_urls.txt')
+DOWNLOADS_DIR = os.path.join(pathlib.Path().absolute(), 'downloaded')
+METADATA_DIR = os.path.join(pathlib.Path().absolute(), 'articles_with_metadata')
 BASE_URL = 'https://www.acn.cat'
 USERNAME = 'TEXT'
 PASSWORD = '1865GB'
 
+if not os.path.isfile(SCRAPPED_URLS_FILE_PATH):
+    SCRAPPED_URLS_FILE_PATH.touch()
 if not os.path.isdir(DOWNLOADS_DIR):
     os.mkdir(DOWNLOADS_DIR)
 if not os.path.isdir(METADATA_DIR):
     os.mkdir(METADATA_DIR)
 
-visited_urls = list()
-for dirpath, dirnames, filenames in os.walk(METADATA_DIR):
-    for filename in filenames:
-        with open(os.path.join(dirpath, filename)) as f:
-            url = json.load(f).get('url')
-            visited_urls.append(url)
+# Read what page start scrapping from.
+if starting_page := input('\nStarting page for scrapping [press ENTER to start from last visited page]: '):
+    page_url = f'{BASE_URL}/text/{starting_page}'
+else:
+    with open(LAST_VISITED_PAGE_FILE_PATH) as f:
+        page_url = f.read()
 
-print(f'already processed articles: {len(visited_urls)}')
+# Store the visited URLs to avoid downloading and parsing the same articles more than once.
+with open(SCRAPPED_URLS_FILE_PATH) as f:
+    scrapped_urls = list(f.readlines())
+
+print(f'Total scrapped articles: {len(scrapped_urls)}')
 
 class TestAcn():
     def setup_method(self, method):
@@ -95,19 +103,13 @@ class TestAcn():
         # Accept cookies in bottom banner to avoid 'selenium.common.exceptions.ElementClickInterceptedException'.
         self.driver.find_element_by_class_name('accept').click()
 
-        # Read what page start scrapping from.
-        with open(os.path.join(PROJECT_DIR, 'acn_last_visited_page.txt')) as f:
-            page_url = f.read()
-        if picked_page := input('Start scrapping from page [press RETURN to start from last visited page]: '):
-            page_url = f'{BASE_URL}/text/{picked_page}'
-
         # Go to section where news can be downloaded as plain text files.
         self.driver.get(page_url)
         while True:
             current_page_url = self.driver.current_url
 
-            # Override tha last page visited.
-            with open(os.path.join(PROJECT_DIR, 'acn_last_visited_page.txt'), 'w') as f:
+            # Overwrite the last page visited.
+            with open(LAST_VISITED_PAGE_FILE_PATH, 'w') as f:
                 f.write(current_page_url)
 
             # Terminal feedback on currently precessed page.
@@ -115,7 +117,7 @@ class TestAcn():
             print(current_page_url)
 
             article_elements = self.driver.find_elements_by_xpath("//a[starts-with(@href, '/text/item')]")
-            articles_urls = [element.get_attribute("href") for element in article_elements if element.get_attribute("href") not in visited_urls]
+            articles_urls = [href for element in article_elements if (href := element.get_attribute("href")) not in scrapped_urls]
             for article_url in articles_urls:
 
                 # Terminal feedback on currently processed article.
@@ -124,28 +126,27 @@ class TestAcn():
                 # Load the article in emulated browser.
                 self.driver.get(article_url)
 
-                # Download the txt file.
-                self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
-                
                 # Get article's id.
                 id = self.driver.find_elements_by_class_name('element-staticcontent')[1].text.split(': ')[1]
                 text_file = os.path.join(DOWNLOADS_DIR, f'noticia_{id}.txt')
 
-                # Wait until the file has been downloaded.
+                # Download the plain text file and wait until the file is downloaded.
+                self.driver.find_element_by_xpath("//a[starts-with(@id, 'download')]").click()
                 while not os.path.isfile(text_file):
                     time.sleep(0.5)
 
                 # Get metadata.
                 publication_datetime = self.driver.find_element_by_css_selector(".uk-text-left > .uk-margin-small").text
-                section_subsection = self.driver.find_elements_by_class_name('element-relatedcategories')[0].text.split(': ')[1].split(', ')
+                related_categories = self.driver.find_elements_by_class_name('element-relatedcategories')
+                section_subsection = related_categories[0].text.split(': ')[1].split(', ')
                 section = section_subsection[0]
                 subsection = section_subsection[1] if len(section_subsection) > 1 else None
-                territorial_coding = self.driver.find_elements_by_class_name('element-relatedcategories')[1].text.split(': ')[1].split(', ')
+                territorial_coding = related_categories[1].text.split(': ')[1].split(', ') if len(related_categories) > 1 else None
                 categories = self.driver.find_element_by_class_name('element-itemcategory').text.split(': ')[1].split(', ')
 
-                # Some articles may not have assigned tags.
+                # Some articles may not have tags.
                 try:
-                    # Fix missing colon ':'.
+                    # Fix missing colon ':' in HTML rendering.
                     tags = self.driver.find_element_by_class_name('element-itemtag').text.replace('Etiquetes', 'Etiquetes:').split(': ')[1].split(', ')
                 except expected_conditions.NoSuchElementException:
                     tags = list()
@@ -175,6 +176,10 @@ class TestAcn():
                 # Write metadata and text in a json file.
                 with open(os.path.join(METADATA_DIR, f'noticia_{id}.json'), 'w') as f:
                     json.dump(metadata, f, ensure_ascii=False, indent=2)
+
+                # Write the scrapped URL in a file to avoid parsing the same article more than once in further executions.
+                with open(SCRAPPED_URLS_FILE_PATH, 'a') as f:
+                    f.write(f'{article_url}\n')
 
             # Go back to current page and look for next page button or finish if last page.
             self.driver.get(current_page_url)
