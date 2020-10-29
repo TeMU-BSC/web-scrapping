@@ -1,6 +1,6 @@
 '''
 Script to download news from Agència Calatana de Notícies (ACN) website
-using Selenium IDE and Selenium Web Driver for Firefox.
+using Selenium IDE and Selenium Web Driver.
 
 This scrapper is prepared to run without graphical interface, using the chrome
 driver and faking a screen via a python wrapper for Xvfb.
