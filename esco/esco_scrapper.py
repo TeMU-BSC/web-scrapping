@@ -53,4 +53,4 @@ with open(output_filename, 'w') as output_file:
         writer.writerow(row)
 
         # for visual progress in terminal
-        print(code, row.get('preferredLabel'), uri)
+        print(code, row.get('preferredLabel'))
