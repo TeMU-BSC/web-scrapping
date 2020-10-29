@@ -20,6 +20,9 @@ sudo apt install xvfb
 cd acn
 xvfb-run pytest -s test_acn.py
 
+# European Skills/Competences, qualifications and Occupations (ESCO): <https://ec.europa.eu/esco/portal/occupation>
+python esco_scrapper.py occupations_es.csv
+
 deactivate
 ```
 
