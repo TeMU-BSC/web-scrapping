@@ -42,15 +42,19 @@ def scrap_esco_code(concept_uri):
 with open(input_filename) as input_file:
     rows = list(csv.DictReader(input_file))
     fieldnames = rows[0].keys()
+    fieldnames.append('code')
 
 with open(output_filename, 'w') as output_file:
     writer = csv.DictWriter(output_file, fieldnames=fieldnames)
     writer.writeheader()
-    for row in rows:
-        concept_uri = row.get('conceptUri')
-        code = scrap_esco_code(concept_uri)
-        row['code'] = code
+
+for row in rows:
+    concept_uri = row.get('conceptUri')
+    code = scrap_esco_code(concept_uri)
+    row['code'] = code
+    with open(output_filename, 'a') as output_file:
+        writer = csv.DictWriter(output_file, fieldnames=fieldnames)
         writer.writerow(row)
 
-        # for visual progress in terminal
-        print(code, row.get('preferredLabel'))
+    # for visual progress in terminal
+    print(code, row.get('preferredLabel'))
