@@ -1,4 +1,6 @@
 beautifulsoup4
+numpy
+pandas
 pytest
 pyvirtualdisplay
 requests
