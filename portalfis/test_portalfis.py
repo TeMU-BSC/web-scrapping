@@ -36,7 +36,7 @@ OUTPUT_DIR = 'scrapped_docs'
 
 class TestPortalfis():
     def setup_method(self, method):
-        self.driver = webdriver.Firefox(executable_path=os.path.join(Path().absolute(), 'geckodriver-v0.27.0-linux64/geckodriver'))
+        self.driver = webdriver.Firefox(executable_path=os.path.join(Path().absolute(), 'geckodriver-v0.27.0-linux64', 'geckodriver'))
         self.vars = {}
 
     def teardown_method(self, method):

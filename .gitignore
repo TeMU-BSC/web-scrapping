@@ -132,7 +132,3 @@ dmypy.json
 
 # Visual Studio Code
 .vscode/
-
-# Ignored scrapping files 
-downloaded/
-articles_with_metadata/

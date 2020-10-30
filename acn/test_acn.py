@@ -36,14 +36,13 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
-CHROMEDRIVER_PATH = os.path.join(pathlib.Path(__file__).parent.parent.absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver')
-LAST_VISITED_PAGE_FILE_PATH = pathlib.Path('last_visited_page.txt')
-SCRAPPED_URLS_FILE_PATH = pathlib.Path('scrapped_urls.txt')
-DOWNLOADS_DIR = os.path.join(pathlib.Path().absolute(), 'downloaded')
-METADATA_DIR = os.path.join(pathlib.Path().absolute(), 'articles_with_metadata')
 BASE_URL = 'https://www.acn.cat'
 USERNAME = 'TEXT'
 PASSWORD = '1865GB'
+DOWNLOADS_DIR = os.path.join(pathlib.Path().absolute(), 'downloaded')
+METADATA_DIR = os.path.join(pathlib.Path().absolute(), 'articles_with_metadata')
+SCRAPPED_URLS_FILE_PATH = pathlib.Path('scrapped_urls.txt')
+LAST_VISITED_PAGE_FILE_PATH = pathlib.Path('last_visited_page.txt')
 
 if not os.path.isfile(SCRAPPED_URLS_FILE_PATH):
     SCRAPPED_URLS_FILE_PATH.touch()
@@ -82,7 +81,7 @@ class TestAcn():
         }
         chrome_options.add_experimental_option('prefs', prefs)
         self.driver = webdriver.Chrome(
-            executable_path=CHROMEDRIVER_PATH,
+            executable_path=os.path.join(pathlib.Path().absolute(), 'chromedriver_linux64_85.0.4183.87', 'chromedriver'),
             options=chrome_options,
             service_args=['--verbose', '--log-path=./chromedriver.log']
         )
