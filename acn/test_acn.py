@@ -12,10 +12,11 @@ https://addons.mozilla.org/en-US/firefox/addon/selenium-ide/
 https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
 
 Usage:
+    sudo apt install xvfb
     xvfb-run pytest -s test_acn.py
 
 Notes:
-    Xvfb has to be installed on the system (sudo apt install xvfb).
+    Xvfb has to be installed on the system.
     -s (--capture=no) option allows to see stdout like print statements inside test_* functions.
 
 Author: https://github.com/aasensios

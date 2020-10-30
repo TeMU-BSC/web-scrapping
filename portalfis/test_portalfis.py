@@ -4,6 +4,12 @@ Script to download all the projects at Portal Fondo de Investigación en Salud
 
 https://portalfis.isciii.es/es/Paginas/inicio.aspx
 
+Usage:
+    pytest -s test_portalfis.py
+
+Notes:
+    -s (--capture=no) option allows to see stdout like print statements inside test_* functions.
+
 Author: https://github.com/aasensios
 '''
 
@@ -79,5 +85,7 @@ class TestPortalfis():
                 self.driver.find_element(By.ID, "ctl00_ctl34_g_063b679b_01b6_4da9_8097_7aba78758e18_lnkMigaPanBusqueda").click()
                 # Prepare the next filename
                 filenumber += 1
+                # Visual progress on the terminal
+                print(self.vars["project_id"])
             # Go to next page
             self.driver.find_element(By.ID, "ctl00_ctl34_g_b8905950_4e9a_4a7e_9d2d_d728f1b64287_ctl00_imgSiguiente").click()

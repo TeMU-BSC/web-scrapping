@@ -4,24 +4,16 @@ Scrapping scripts for specific websites.
 
 ## Usage
 
+> Note: Replace `SCRAPPING_PROJECT` by the desired subdirectory of this repository.
+
 ```bash
-git clone https://github.com/TeMU-BSC/web-scrapping.git
-cd web-scrapping
+cd SCRAPPING_PROJECT
 python3.8 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 
-# ISCIII's Portal FIS: <https://portalfis.isciii.es/es/Paginas/inicio.aspx>
-cd portalfis
-pytest -s test_portalfis.py
-
-# Agència Catalana de Notícies: <https://www.acn.cat/>
-sudo apt install xvfb
-cd acn
-xvfb-run pytest -s test_acn.py
-
-# European Skills/Competences, qualifications and Occupations (ESCO): <https://ec.europa.eu/esco/portal/occupation>
-python esco_scrapper.py occupations_es.csv
+# Read the docstring at the top of each python script to know how to run each scrapper.
+# ...
 
 deactivate
 ```
@@ -30,4 +22,5 @@ deactivate
 
 Download [Selenium IDE for Firefox](https://addons.mozilla.org/en-US/firefox/addon/selenium-ide/).
 
-Open Selenium IDE plugin in Firefox and load the desired *.side file from this repo.
+Open Selenium IDE plugin in Firefox browser.
+If the project has a file with `.side` extension, you can load it into Selenium IDE.

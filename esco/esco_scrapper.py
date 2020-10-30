@@ -1,6 +1,7 @@
 '''
 Script to scrap the exact codes of every occupation from
-"European Skills/Competences, qualifications and Occupations" (ESCO) website.
+"European Skills/Competences, qualifications and Occupations" (ESCO) website:
+https://ec.europa.eu/esco/portal/occupation
 
 Previously, we have downloaded all occupations terms in Spanish via the portal:
 https://ec.europa.eu/esco/portal/download
