@@ -4,6 +4,10 @@ the preferred, alternative and hidden labels each ESCO code might contain.
 
 Usage: python tsv_builder_code_term.py occupations_es_extra_code.csv esco_codes_occupations_es.tsv
 
+Important: Once the tsv file is generated, it should be manually cleaned,
+searching for slashes ('/') in masculine/femenine differentiated terms,
+adding new lines as needed.
+
 Author: https://github.com/aasensios
 '''
 
@@ -26,10 +30,9 @@ with open(output_filename, 'w') as f:
     for row in rows:
         code = row.get('code')
         preferred = row.get('preferredLabel').split('/')
-        alternatives = row.get('altLabels').splitlines()
-        alternatives_plain = [label for alt in alternatives for label in alt.split('/')]
+        alternative = row.get('altLabels').splitlines()
         hidden = row.get('hiddenLabels').splitlines()
-        terms = set([term.strip() for term in preferred + alternatives_plain + hidden])
+        terms = set([term.strip() for term in preferred + alternative + hidden])
         rows_to_write.extend([dict(code=code, term=term) for term in terms])
     
     sorted_rows_to_write = sorted(rows_to_write, key=lambda row: (row.get('code'), row.get('term')))
